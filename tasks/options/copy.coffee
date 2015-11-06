@@ -1,11 +1,8 @@
-appName = require('../../bower.json').name
+appName = require('../../package.json').name
 
 module.exports =
 	demo:
 		files: [
-			dest: "demo/app/scripts/cropme.js"
-			src: "cropme.js"
-		,
-			dest: "demo/app/styles/cropme.css"
-			src: "cropme.css"
+			dest: "demo/app/client/scripts/#{appName}.js"
+			src: "#{appName}.js"
 		]

@@ -1,5 +1,5 @@
 module.exports =
-  html: "app/index.html"
+  html: "app/client/index.handlebars"
   options:
     dest: "dist"
     flow:

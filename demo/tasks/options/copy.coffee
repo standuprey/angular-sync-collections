@@ -7,11 +7,12 @@ module.exports =
 				cwd: "app"
 				dest: "dist"
 				src: [
-					"*.{ico,png,txt}"
-					"*.html"
-					"views/{,*/}*.html"
-					"styles/*.css"
-					"images/*.*"
+					"client/*.{ico,png,txt}"
+					"client/*.html"
+					"client/views/{,*/}*.html"
+					"client/styles/*.css"
+					"client/images/*.*"
+					"server/**/*.coffee"
 				]
 			}
 		]

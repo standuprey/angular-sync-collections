@@ -1,4 +1,4 @@
-appName = require('../../bower.json').name
+appName = require('../../package.json').name
 
 module.exports =
   options:

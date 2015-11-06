@@ -18,7 +18,7 @@ module.exports = (config) ->
       'bower_components/angular-sanitize/angular-sanitize.js'
       'bower_components/angular-touch/angular-touch.js'
       'bower_components/angular-superswipe/superswipe.js'
-      'cropme.js'
+      'syncCollections.js'
       'test/spec/**/*.coffee'
     ]
 

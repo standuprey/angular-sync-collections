@@ -9,7 +9,6 @@ module.exports = (grunt) ->
     copy: require "./tasks/options/copy"
     clean: require "./tasks/options/clean"
     coffee: require "./tasks/options/coffee"
-    compass: require "./tasks/options/compass"
     connect: require "./tasks/options/connect"
     karma: require "./tasks/options/karma"
     concat: require "./tasks/options/concat"
@@ -19,7 +18,6 @@ module.exports = (grunt) ->
 
   grunt.registerTask "build", [
     "clean"
-    "compass"
     "coffee"
     "concat"
     "ngAnnotate"
@@ -31,7 +29,6 @@ module.exports = (grunt) ->
 
   grunt.registerTask "debug", [
     "clean"
-    "compass"
     "coffee"
     "concat"
     "ngAnnotate"

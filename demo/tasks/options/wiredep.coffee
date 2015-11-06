@@ -1,4 +1,4 @@
 module.exports =
 	dist:
-		src: ['app/index.html']
+		src: ['app/client/index.handlebars']
 		ignorePath:  /\.\.\//

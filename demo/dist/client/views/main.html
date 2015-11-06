@@ -1,0 +1,24 @@
+<h1>Users in the client</h1>
+<ul>
+	<li ng-repeat="user in users">
+		{{user.name}} - {{user.phone}} (id:{{user._id}})
+	</li>
+</ul>
+<h1>Create</h1>
+<form name="userForm2" action="users" method="post">
+	<input type="text" name="name" placeholder="user name">
+	<input type="text" name="phone" placeholder="user phone">
+	<input type="submit" value="submit">
+</form>
+<h1>Update</h1>
+<form name="userForm3" action="users/update" method="post">
+	<input type="text" name="userId" placeholder="user id">
+	<input type="text" name="name" placeholder="user name">
+	<input type="text" name="phone" placeholder="user phone">
+	<input type="submit" value="submit">
+</form>
+<h1>Delete</h1>
+<form name="userForm4" action="users/delete" method="post">
+	<input type="text" name="userId" placeholder="user id">
+	<input type="submit" value="submit">
+</form>

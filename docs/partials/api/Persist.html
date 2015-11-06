@@ -1,0 +1,28 @@
+<h1><code ng:non-bindable="">Persist</code>
+<div><span class="hint"></span>
+</div>
+</h1>
+<div><h2 id="description">Description</h2>
+<div class="description"><div class="persist-page"><p>Service used to retrieve collections from the database
+This service used to retrieve and persist objects from the Storage.</p>
+</div></div>
+<h2 id="dependencies">Dependencies</h2>
+<ul class="dependencies"><li><code ng:non-bindable=""><a href="#/api/ng.$q,">$q,</a></code>
+<div class="persist-page"><p>$http, Config, Loader, Storage</p>
+</div></li>
+</ul>
+<h2 id="example">Example</h2>
+<div class="example"><div class="persist-page"><h3 id="example_with-a-model">With a model</h3>
+<pre><code class="lang-js">promise = Persist.init &quot;humans&quot;, Human
+promise.then -&gt; humans = Persist.get &quot;humans&quot;
+</code></pre>
+<h3 id="example_without-default-model">without default model</h3>
+<pre><code class="lang-js">config = Persist.init &quot;config&quot;
+config.perPage = 20
+Persist.save config
+</code></pre>
+<h3 id="example_delete-everything">delete everything</h3>
+<pre><code class="lang-js">Persist.reset()
+</code></pre>
+</div></div>
+</div>
