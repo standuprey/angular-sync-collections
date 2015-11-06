@@ -4,6 +4,16 @@ Angular-sync-collections
 If you want to try and see what this is all about first:
 [Demo here!](http://synccollection.herokuapp.com)
 
+What is it?
+-----------
+
+It creates a local copy of your database collection that will only request the collection if it has been updated. Obviously, this is not fitting every use case, because if the collection is updated, the whole collection will be requested by the client. But if you collections are not too big and do not get updated too often, this will be a good fit, the client will be faster and the backend load will be lower.
+
+How does it work?
+-----------------
+
+When calling Loader.load() the module will check the counter for every collection declared and for each counter that changed it will fetch the collection and put it in the local data store (localStorage or pouchDB)
+
 Install
 -------
 
@@ -97,6 +107,19 @@ If you need the additional filtering methods:
 		});
 
 You can also specify the model and add class and instance methods (I'll explain if need be...)
+
+Then you need to load the collection:
+
+		Loader.load().then(function(){
+			// do something	
+		})
+
+This can be easily done in your router where you ask to resolve the load before rendering the route
+
+	// Need to make sure all the collection are initialized, so we declare them here as dependencies
+	loadInitialData = function(Loader, GarmentCollection, CategoryCollection, ColorCollection, DesignerCollection, StyleCollection){
+		return Loader.load();
+	}
 
 API
 ---
