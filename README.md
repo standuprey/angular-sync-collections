@@ -2,7 +2,7 @@ Angular-sync-collections
 ========================
 
 If you want to try and see what this is all about first:
-[Demo here!](http://synccollections.herokuapp.com)
+[Demo here!](http://synccollection.herokuapp.com)
 
 Install
 -------
@@ -132,4 +132,4 @@ and start the demo
 You should be able to then go on your browser at localhost:3000
 
 If you want to try and see what this is all about:
-[Demo here!](http://synccollections.herokuapp.com)
+[Demo here!](http://synccollection.herokuapp.com)
