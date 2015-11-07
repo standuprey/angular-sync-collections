@@ -25,7 +25,7 @@ Copy the angular-sync-collections.js files into your project and add the followi
 
 Alternatively, if you're using bower, you can add this to your component.json (or bower.json):
 
-		"angular-sync-collections": "~0.3.6"
+		"angular-sync-collections": "~0.0.1"
 
 Or simply run
 
@@ -68,7 +68,7 @@ Data store use to store the collections on the client (also available: "LocalSto
 
 #### To customize the configuration:
 
-		angular.module("myApp", ["angular-sync-collections"]).run(function(Config){
+		angular.module("myApp", ["syncCollections"]).run(function(Config){
 			Config.store = "LocalStorage";	
 		});
 
