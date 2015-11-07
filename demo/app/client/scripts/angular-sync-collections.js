@@ -63,7 +63,6 @@
       },
       extendAndPersist: function(obj) {
         var collection;
-        console.log('extendAndPersist', obj);
         collection = this.extend(obj);
         collection.promise = Persist.init(collection.name, collection.Model);
         return collection;
@@ -394,7 +393,6 @@
       init: function(collectionName, Model) {
         var deferred;
         deferred = $q.defer();
-        console.log(collectionName, Model);
         this._checkCounterAndLoad(deferred, collectionName, Model);
         Loader.addPromise(deferred.promise);
         return deferred.promise;
