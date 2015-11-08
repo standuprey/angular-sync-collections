@@ -32,15 +32,6 @@ NG_DOCS={
     },
     {
       "section": "api",
-      "id": "Config",
-      "shortName": "Config",
-      "type": "service",
-      "moduleName": "Config",
-      "shortDescription": "Abstract service providing basic methods to manipulate collections",
-      "keywords": "abstract angular api basecollection basic collections config extendandpersist factory js manipulate methods module providing service stats synccollections"
-    },
-    {
-      "section": "api",
       "id": "Loader",
       "shortName": "Loader",
       "type": "service",
@@ -55,7 +46,7 @@ NG_DOCS={
       "type": "service",
       "moduleName": "Persist",
       "shortDescription": "Service used to retrieve collections from the database",
-      "keywords": "$http $q api collections config database default delete human humans init js loader model objects perpage persist promise reset retrieve save service storage"
+      "keywords": "$http $q api collections config database default delete human humans init js loader model objects perpage persist promise reset retrieve save service storage synccollectionsconfig"
     },
     {
       "section": "api",
@@ -74,6 +65,15 @@ NG_DOCS={
       "moduleName": "Storage",
       "shortDescription": "Data store using PouchDB",
       "keywords": "api data pouchdb service storage store"
+    },
+    {
+      "section": "api",
+      "id": "SyncCollectionsConfig",
+      "shortName": "SyncCollectionsConfig",
+      "type": "service",
+      "moduleName": "SyncCollectionsConfig",
+      "shortDescription": "Abstract service providing basic methods to manipulate collections",
+      "keywords": "abstract angular api basecollection basic collections extendandpersist factory js manipulate methods module providing service stats synccollections synccollectionsconfig"
     }
   ],
   "apis": {

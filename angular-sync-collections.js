@@ -181,35 +181,6 @@
 
   /**
     * @ngdoc service
-    * @name Config
-    * @requires
-    * @description
-    * Abstract service providing basic methods to manipulate collections
-    *
-    * @example
-  
-  ```js
-  	angular.module("syncCollections").factory "Stats", (BaseCollection) ->
-  		BaseCollection.extendAndPersist
-  			name: "stats"
-  ```
-   */
-  angular.module("syncCollections").factory("Config", function() {
-    return {
-      apiUrl: "",
-      retryCount: 3,
-      retryDelay: 500,
-      requestTimeout: 5000,
-      store: "PouchDBStorage"
-    };
-  });
-
-}).call(this);
-;(function() {
-  "use strict";
-
-  /**
-    * @ngdoc service
     * @name Loader
     * @requires $q
     * @description
@@ -323,7 +294,7 @@
   /**
     * @ngdoc service
     * @name Persist
-    * @requires $q, $http, Config, Loader, Storage
+    * @requires $q, $http, SyncCollectionsConfig, Loader, Storage
     * @description
     * Service used to retrieve collections from the database
     * This service used to retrieve and persist objects from the Storage.
@@ -344,9 +315,9 @@
   Persist.reset()
   ```
    */
-  angular.module("syncCollections").factory("Persist", ["$q", "$http", "$timeout", "$injector", "Config", "Loader", function($q, $http, $timeout, $injector, Config, Loader) {
+  angular.module("syncCollections").factory("Persist", ["$q", "$http", "$timeout", "$injector", "SyncCollectionsConfig", "Loader", function($q, $http, $timeout, $injector, SyncCollectionsConfig, Loader) {
     var Storage, getCounter, persistable;
-    Storage = $injector.get(Config.store);
+    Storage = $injector.get(SyncCollectionsConfig.store);
     persistable = {};
     getCounter = function(name) {
       var deferred;
@@ -406,9 +377,9 @@
       _checkCounter: function(deferred, collectionName, Model) {
         return getCounter(collectionName).then((function(_this) {
           return function(counter) {
-            return $http.get("" + Config.apiUrl + "/counter/" + collectionName, {
-              withCredentials: true,
-              timeout: Config.requestTimeout
+            return $http.get("" + SyncCollectionsConfig.apiUrl + "/counter/" + collectionName, {
+              withCredentials: SyncCollectionsConfig.withCredentials,
+              timeout: SyncCollectionsConfig.requestTimeout
             }).success(function(remoteCounter) {
               return deferred.resolve(counter === remoteCounter.counter);
             }).error(function() {
@@ -432,9 +403,9 @@
         if (window.cordova && ((_ref = navigator.connection) != null ? _ref.type : void 0) === Connection.NONE) {
           return this._getLocalCollection(deferred, collectionName, Model);
         } else {
-          return $http.get("" + Config.apiUrl + "/counter/" + collectionName, {
-            withCredentials: true,
-            timeout: 2 * Config.requestTimeout
+          return $http.get("" + SyncCollectionsConfig.apiUrl + "/counter/" + collectionName, {
+            withCredentials: SyncCollectionsConfig.withCredentials,
+            timeout: 2 * SyncCollectionsConfig.requestTimeout
           }).success((function(_this) {
             return function(remoteCounter) {
               if (counter === remoteCounter.counter) {
@@ -445,11 +416,11 @@
             };
           })(this)).error((function(_this) {
             return function() {
-              if (retry++ < Config.retryCount) {
-                console.error("Could not get the counter for " + collectionName + ", retry in 500ms (" + retry + "/" + Config.retryCount + ")");
+              if (retry++ < SyncCollectionsConfig.retryCount) {
+                console.error("Could not get the counter for " + collectionName + ", retry in 500ms (" + retry + "/" + SyncCollectionsConfig.retryCount + ")");
                 return $timeout(function() {
                   return _this._updateCollection(deferred, collectionName, Model, counter, retry);
-                }, Config.retryDelay);
+                }, SyncCollectionsConfig.retryDelay);
               } else {
                 console.error("Could not get the counter for " + collectionName + ", you may be offline? Getting local collection");
                 return _this._getLocalCollection(deferred, collectionName, Model);
@@ -459,9 +430,9 @@
         }
       },
       _fetchCollection: function(deferred, collectionName, Model, counter) {
-        return $http.get("" + Config.apiUrl + "/" + collectionName, {
-          withCredentials: true,
-          timeout: 5 * Config.requestTimeout
+        return $http.get("" + SyncCollectionsConfig.apiUrl + "/" + collectionName, {
+          withCredentials: SyncCollectionsConfig.withCredentials,
+          timeout: 5 * SyncCollectionsConfig.requestTimeout
         }).success((function(_this) {
           return function(collection) {
             return Storage.set(collectionName, collection, counter).then(function() {
@@ -578,5 +549,35 @@
       }
     };
   }]);
+
+}).call(this);
+;(function() {
+  "use strict";
+
+  /**
+    * @ngdoc service
+    * @name SyncCollectionsConfig
+    * @requires
+    * @description
+    * Abstract service providing basic methods to manipulate collections
+    *
+    * @example
+  
+  ```js
+  	angular.module("syncCollections").factory "Stats", (BaseCollection) ->
+  		BaseCollection.extendAndPersist
+  			name: "stats"
+  ```
+   */
+  angular.module("syncCollections").factory("SyncCollectionsConfig", function() {
+    return {
+      apiUrl: "",
+      retryCount: 3,
+      retryDelay: 500,
+      requestTimeout: 5000,
+      store: "PouchDBStorage",
+      withCredentials: false
+    };
+  });
 
 }).call(this);

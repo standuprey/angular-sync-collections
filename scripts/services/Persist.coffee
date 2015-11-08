@@ -3,7 +3,7 @@
 ###*
  # @ngdoc service
  # @name Persist
- # @requires $q, $http, Config, Loader, Storage
+ # @requires $q, $http, SyncCollectionsConfig, Loader, Storage
  # @description
  # Service used to retrieve collections from the database
  # This service used to retrieve and persist objects from the Storage.
@@ -24,8 +24,8 @@ Persist.save config
 Persist.reset()
 ```
 ###
-angular.module("syncCollections").factory "Persist", ($q, $http, $timeout, $injector, Config, Loader) ->
-	Storage = $injector.get(Config.store);
+angular.module("syncCollections").factory "Persist", ($q, $http, $timeout, $injector, SyncCollectionsConfig, Loader) ->
+	Storage = $injector.get(SyncCollectionsConfig.store);
 	persistable = {}
 	getCounter = (name) ->
 		deferred = $q.defer()
@@ -62,7 +62,7 @@ angular.module("syncCollections").factory "Persist", ($q, $http, $timeout, $inje
 	get: (collectionName) -> persistable[collectionName]?.collection || throw "Collection #{collectionName} does not exist"
 	_checkCounter: (deferred, collectionName, Model) ->
 		getCounter(collectionName).then (counter) =>
-			$http.get("#{Config.apiUrl}/counter/#{collectionName}", {withCredentials: true, timeout: Config.requestTimeout})
+			$http.get("#{SyncCollectionsConfig.apiUrl}/counter/#{collectionName}", {withCredentials: SyncCollectionsConfig.withCredentials, timeout: SyncCollectionsConfig.requestTimeout})
 			.success (remoteCounter) -> deferred.resolve counter is remoteCounter.counter
 			.error -> deferred.reject()
 	_checkCounterAndLoad: (deferred, collectionName, Model) ->
@@ -72,23 +72,23 @@ angular.module("syncCollections").factory "Persist", ($q, $http, $timeout, $inje
 		if window.cordova and navigator.connection?.type is Connection.NONE
 			@_getLocalCollection deferred, collectionName, Model
 		else
-			$http.get("#{Config.apiUrl}/counter/#{collectionName}", {withCredentials: true, timeout: 2 * Config.requestTimeout})
+			$http.get("#{SyncCollectionsConfig.apiUrl}/counter/#{collectionName}", {withCredentials: SyncCollectionsConfig.withCredentials, timeout: 2 * SyncCollectionsConfig.requestTimeout})
 			.success (remoteCounter) =>
 				if counter is remoteCounter.counter
 					@_getLocalCollection deferred, collectionName, Model
 				else
 					@_fetchCollection deferred, collectionName, Model, remoteCounter.counter
 			.error =>
-				if retry++ < Config.retryCount
-					console.error "Could not get the counter for #{collectionName}, retry in 500ms (#{retry}/#{Config.retryCount})"
+				if retry++ < SyncCollectionsConfig.retryCount
+					console.error "Could not get the counter for #{collectionName}, retry in 500ms (#{retry}/#{SyncCollectionsConfig.retryCount})"
 					$timeout =>
 						@_updateCollection deferred, collectionName, Model, counter, retry
-					, Config.retryDelay
+					, SyncCollectionsConfig.retryDelay
 				else
 					console.error "Could not get the counter for #{collectionName}, you may be offline? Getting local collection"
 					@_getLocalCollection deferred, collectionName, Model
 	_fetchCollection: (deferred, collectionName, Model, counter) ->
-		$http.get("#{Config.apiUrl}/#{collectionName}", {withCredentials: true, timeout: 5 * Config.requestTimeout})
+		$http.get("#{SyncCollectionsConfig.apiUrl}/#{collectionName}", {withCredentials: SyncCollectionsConfig.withCredentials, timeout: 5 * SyncCollectionsConfig.requestTimeout})
 		.success (collection) =>
 			Storage.set(collectionName, collection, counter).then =>
 				@_getLocalCollection deferred, collectionName, Model

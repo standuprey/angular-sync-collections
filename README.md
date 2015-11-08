@@ -47,11 +47,11 @@ Add the module to your application
 
 		angular.module("myApp", ["angular-sync-collections"])
 
-Config
-------
+SyncCollectionsConfig
+--------------------
 
 #### 	apiUrl (default: "")
-If you want to make CORS call to request your collections, you need to specify the apiUrl here (and you also need to allow cross-domain header on the server, this could be done with a simple middleware if you use node). Also great if you use this in a phonegap/cordova app for example (I've done it, it works great!)
+If you want to make CORS call to request your collections, you need to specify the apiUrl here (and you also need to allow cross-domain header on the server, this could be done with a simple middleware if you use node). Also great if you use this in a phonegap/cordova app for example (I've done it, it works great!). Not that if you're using CORS, set useCredentials to true
 
 #### retryCount (default: 3)
 Number of retries when requesting counter/collections
@@ -68,9 +68,12 @@ Data store use to store the collections on the client (also available: "LocalSto
 
 #### To customize the configuration:
 
-		angular.module("myApp", ["syncCollections"]).run(function(Config){
-			Config.store = "LocalStorage";	
+		angular.module("myApp", ["syncCollections"]).run(function(SyncCollectionsConfig){
+			SyncCollectionsConfig.store = "LocalStorage";	
 		});
+
+#### useCredentials
+Needs to be set to true when apiUrl refers to another domain.
 
 
 Server setup
@@ -85,8 +88,8 @@ For example, if your collection is "users", you will need
 Every operation that add/deletes/modifies users, need to increment the counter, the counter can never be decremented
 See the demo for a simple example with users using node
 
-you can use Config.apiUrl to customize the collection and counter path
-if `Config.apiUrl = "api/v1"` the routes for the users collections are
+you can use SyncCollectionsConfig.apiUrl to customize the collection and counter path
+if `SyncCollectionsConfig.apiUrl = "api/v1"` the routes for the users collections are
 
 		/api/v1/users
 		/api/v1/counter/users
