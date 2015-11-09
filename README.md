@@ -145,10 +145,11 @@ Persist service
 ---------------
 
 You can inject the Persist service to access the following methods
-Persist.load(forceResync = true)
-Persist.isLoading()
-Persist.reset()
-Persist.resync()
+
+		Persist.load(forceResync = true)
+		Persist.isLoading()
+		Persist.reset()
+		Persist.resync()
 
 Demo
 ----
