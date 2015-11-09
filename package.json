@@ -1,6 +1,6 @@
 {
   "name": "angular-sync-collections",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Keep collections in sync between local data store and remote database",
   "homepage": "http://github.com/standup75/angular-sync-collections",
   "repository": {
