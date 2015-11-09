@@ -27,6 +27,7 @@ Persist.reset()
 angular.module("syncCollections").factory "Persist", ($q, $http, $timeout, $injector, SyncCollectionsConfig, Loader) ->
 	Storage = $injector.get(SyncCollectionsConfig.store);
 	persistable = {}
+	resyncPromise = null
 	getCounter = (name) ->
 		deferred = $q.defer()
 		Storage.get("counter_#{name}").then (counter) =>
@@ -40,13 +41,22 @@ angular.module("syncCollections").factory "Persist", ($q, $http, $timeout, $inje
 	reset: ->
 		persistable = {}
 		Storage.reset()
-	reload: ->
+	resync: ->
+		return resyncPromise  if resyncPromise
 		promises = []
 		for k, p of persistable
 			deferred = $q.defer()
 			@_checkCounterAndLoad deferred, p.name, p.modelClass
 			promises.push deferred.promise
-		$q.all promises
+		resyncPromise = $q.all promises
+		resyncPromise.then -> resyncPromise = null
+		resyncPromise
+	load: (resync = true) ->
+		if Loader.isLoading()
+			Loader.load()
+		else if resync
+			@resync()
+	isLoading: -> Loader.isLoading()
 	checkCounters: ->
 		promises = []
 		for k, p of persistable

@@ -12,7 +12,7 @@ It creates a local copy of your database collection that will only request the c
 How does it work?
 -----------------
 
-When calling Loader.load() the module will check the counter for every collection declared and for each counter that changed it will fetch the collection and put it in the local data store (localStorage or pouchDB)
+When calling Persist.load() the module will check the counter for every collection declared and for each counter that changed it will fetch the collection and put it in the local data store (localStorage or pouchDB)
 
 Install
 -------
@@ -113,15 +113,15 @@ You can also specify the model and add class and instance methods (I'll explain 
 
 Then you need to load the collection:
 
-		Loader.load().then(function(){
+		Persist.load().then(function(){
 			// do something	
 		})
 
 This can be easily done in your router where you ask to resolve the load before rendering the route
 
 	// Need to make sure all the collection are initialized, so we declare them here as dependencies
-	loadInitialData = function(Loader, GarmentCollection, CategoryCollection, ColorCollection, DesignerCollection, StyleCollection){
-		return Loader.load();
+	loadInitialData = function(Persist, GarmentCollection, CategoryCollection, ColorCollection, DesignerCollection, StyleCollection){
+		return Persist.load();
 	}
 
 API
@@ -141,6 +141,14 @@ BaseFilteredCollection adds the following
 		resetFilter()
 		toggleFilter()
 
+Persist service
+---------------
+
+You can inject the Persist service to access the following methods
+Persist.load(forceResync = true)
+Persist.isLoading()
+Persist.reset()
+Persist.resync()
 
 Demo
 ----
