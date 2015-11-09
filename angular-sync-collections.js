@@ -316,9 +316,10 @@
   ```
    */
   angular.module("syncCollections").factory("Persist", ["$q", "$http", "$timeout", "$injector", "SyncCollectionsConfig", "Loader", function($q, $http, $timeout, $injector, SyncCollectionsConfig, Loader) {
-    var Storage, getCounter, persistable;
+    var Storage, getCounter, persistable, resyncPromise;
     Storage = $injector.get(SyncCollectionsConfig.store);
     persistable = {};
+    resyncPromise = null;
     getCounter = function(name) {
       var deferred;
       deferred = $q.defer();
@@ -339,8 +340,11 @@
         persistable = {};
         return Storage.reset();
       },
-      reload: function() {
+      resync: function() {
         var deferred, k, p, promises;
+        if (resyncPromise) {
+          return resyncPromise;
+        }
         promises = [];
         for (k in persistable) {
           p = persistable[k];
@@ -348,7 +352,24 @@
           this._checkCounterAndLoad(deferred, p.name, p.modelClass);
           promises.push(deferred.promise);
         }
-        return $q.all(promises);
+        resyncPromise = $q.all(promises);
+        resyncPromise.then(function() {
+          return resyncPromise = null;
+        });
+        return resyncPromise;
+      },
+      load: function(resync) {
+        if (resync == null) {
+          resync = true;
+        }
+        if (Loader.isLoading()) {
+          return Loader.load();
+        } else if (resync) {
+          return this.resync();
+        }
+      },
+      isLoading: function() {
+        return Loader.isLoading();
       },
       checkCounters: function() {
         var deferred, k, p, promises;
