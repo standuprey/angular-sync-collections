@@ -7,9 +7,9 @@
  # Data store using the localStorage object.
  # The limit of Storage being 5MB, this is kind of a naive implementation for now.
 ###
-angular.module("syncCollections").factory "LocalStorage", ($window, $q) ->
+angular.module("syncCollections").factory "LocalStorage", ($window, $q, SyncCollectionsConfig) ->
 	_storage = $window.localStorage
-	_prefix: "lovelooks"
+	_prefix: SyncCollectionsConfig.name
 	reset: ->
 		for key of _storage
 			delete _storage[key] if key.indexOf("#{@_prefix}_") is 0

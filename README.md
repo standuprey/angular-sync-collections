@@ -65,6 +65,8 @@ Delay after which unanswered request will be considered timeout (in ms)
 #### store (default: "PouchDBStorage")
 Data store use to store the collections on the client (also available: "LocalStorage")
 
+### name (default: "syncCollections-" + parseInt(Math.random() * 10000000, 10))
+Name of the data store
 
 #### To customize the configuration:
 

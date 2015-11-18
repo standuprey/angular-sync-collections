@@ -6,14 +6,14 @@
  # @description
  # Data store using PouchDB
 ###
-angular.module("syncCollections").factory "PouchDBStorage", ($q, $rootScope) ->
-	db = new PouchDB "lovelooks"
+angular.module("syncCollections").factory "PouchDBStorage", ($q, $rootScope, SyncCollectionsConfig) ->
+	db = new PouchDB SyncCollectionsConfig.name
 	reset: ->
 		$q (resolve, reject) ->
 			db.destroy (err, info) ->
 				$rootScope.$apply ->
-					return reject("Could not delete the lovelooks db") if err
-					db = new PouchDB "lovelooks"
+					return reject("Could not delete the db: " + SyncCollectionsConfig.name) if err
+					db = new PouchDB SyncCollectionsConfig.name
 					resolve()
 	set: (key, value, counter) ->
 		if counter?
