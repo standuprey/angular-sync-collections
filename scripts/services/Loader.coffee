@@ -31,7 +31,7 @@ angular.module("syncCollections").factory "Loader", ($q, $rootScope) ->
 	init()
 
 	addPromise: (promise) -> promises.push promise
-	isLoading: -> promises?.length > 1
+	isLoading: -> promises?.length > 0
 	load: ->
 		unless loadPromise
 			loadPromise = $q.all promises
