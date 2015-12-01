@@ -215,7 +215,7 @@
         return promises.push(promise);
       },
       isLoading: function() {
-        return (promises != null ? promises.length : void 0) > 1;
+        return (promises != null ? promises.length : void 0) > 0;
       },
       load: function() {
         if (!loadPromise) {
@@ -238,11 +238,11 @@
     * Data store using the localStorage object.
     * The limit of Storage being 5MB, this is kind of a naive implementation for now.
    */
-  angular.module("syncCollections").factory("LocalStorage", ["$window", "$q", function($window, $q) {
+  angular.module("syncCollections").factory("LocalStorage", ["$window", "$q", "SyncCollectionsConfig", function($window, $q, SyncCollectionsConfig) {
     var _storage;
     _storage = $window.localStorage;
     return {
-      _prefix: "lovelooks",
+      _prefix: SyncCollectionsConfig.name,
       reset: function() {
         var key;
         for (key in _storage) {
@@ -506,18 +506,18 @@
     * @description
     * Data store using PouchDB
    */
-  angular.module("syncCollections").factory("PouchDBStorage", ["$q", "$rootScope", function($q, $rootScope) {
+  angular.module("syncCollections").factory("PouchDBStorage", ["$q", "$rootScope", "SyncCollectionsConfig", function($q, $rootScope, SyncCollectionsConfig) {
     var db;
-    db = new PouchDB("lovelooks");
+    db = new PouchDB(SyncCollectionsConfig.name);
     return {
       reset: function() {
         return $q(function(resolve, reject) {
           return db.destroy(function(err, info) {
             return $rootScope.$apply(function() {
               if (err) {
-                return reject("Could not delete the lovelooks db");
+                return reject("Could not delete the db: " + SyncCollectionsConfig.name);
               }
-              db = new PouchDB("lovelooks");
+              db = new PouchDB(SyncCollectionsConfig.name);
               return resolve();
             });
           });
@@ -597,7 +597,8 @@
       retryDelay: 500,
       requestTimeout: 5000,
       store: "PouchDBStorage",
-      withCredentials: false
+      withCredentials: false,
+      name: "syncCollections-" + parseInt(Math.random() * 10000000, 10)
     };
   });
 
