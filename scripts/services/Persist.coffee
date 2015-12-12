@@ -56,6 +56,8 @@ angular.module("syncCollections").factory "Persist", ($q, $http, $timeout, $inje
 			Loader.load()
 		else if resync
 			@resync()
+		else
+			$q (resolve) -> resolve()
 	isLoading: -> Loader.isLoading()
 	checkCounters: ->
 		promises = []

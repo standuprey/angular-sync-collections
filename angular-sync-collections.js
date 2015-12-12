@@ -366,6 +366,10 @@
           return Loader.load();
         } else if (resync) {
           return this.resync();
+        } else {
+          return $q(function(resolve) {
+            return resolve();
+          });
         }
       },
       isLoading: function() {
