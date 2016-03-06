@@ -4,6 +4,8 @@
 		{{user.name}} - {{user.phone}} (id:{{user._id}})
 	</li>
 </ul>
+<p>Ok, so, what is the magic here? Open your network tab and reload the page: if you don't make any change the angular-sync-collection module will only request the counter for that collection, it sees that the counter has not changed, so it does not need to request the full collection again</p>
+<p>But if you perform one the following CRUD operations, you will see that the counter has changed and it will request the full collection again</p>
 <h1>Create</h1>
 <form name="userForm2" action="users" method="post">
 	<input type="text" name="name" placeholder="user name">

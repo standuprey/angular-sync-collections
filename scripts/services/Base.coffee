@@ -16,6 +16,17 @@
 ```
 ###
 angular.module("syncCollections").factory "BaseCollection", (Persist) ->
+	argsToQueryArray = (query, field) ->
+		if angular.isObject(query)
+			queryArray = []
+			queryArray.push({key: k, value: v})  for k, v of query
+			return queryArray
+		else
+			if field
+				return [{key: field, value: query}] 
+			else
+				return
+
 	class BaseModel
 		constructor: (literal) ->
 			angular.extend this, literal
@@ -35,16 +46,18 @@ angular.module("syncCollections").factory "BaseCollection", (Persist) ->
 		collection.promise = Persist.init collection.name, collection.Model
 		collection
 	all: -> Persist.get @name
-	find: (value, field) ->
-		return [] unless value? and field?
+	find: (query, field) ->
+		queryArray = argsToQueryArray(query, fields)
+		return [] unless queryArray?
 		res = []
 		for model in @all()
-			if model[field] is value
+			if queryArray.filter(param -> model[param.key] isnt param.value).length is 0
 				res.push model
 		res
-	findOne: (value, field) ->
-		return null unless value?
+	findOne: (query, field) ->
+		queryArray = argsToQueryArray(query, fields)
+		return [] unless queryArray?
 		for model in @all()
-			if model[field] is value
+			if queryArray.filter(param -> model[param.key] isnt param.value).length is 0
 				return model
 		null

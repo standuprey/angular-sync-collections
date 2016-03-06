@@ -31,7 +31,32 @@
   ```
    */
   angular.module("syncCollections").factory("BaseCollection", ["Persist", function(Persist) {
-    var BaseModel;
+    var BaseModel, argsToQueryArray;
+    argsToQueryArray = function(query, field) {
+      var k, queryArray, v;
+      if (angular.isObject(query)) {
+        queryArray = [];
+        for (k in query) {
+          v = query[k];
+          queryArray.push({
+            key: k,
+            value: v
+          });
+        }
+        return queryArray;
+      } else {
+        if (field) {
+          return [
+            {
+              key: field,
+              value: query
+            }
+          ];
+        } else {
+
+        }
+      }
+    };
     BaseModel = (function() {
       function BaseModel(literal) {
         angular.extend(this, literal);
@@ -63,7 +88,6 @@
       },
       extendAndPersist: function(obj) {
         var collection;
-        console.log('extendAndPersist', obj);
         collection = this.extend(obj);
         collection.promise = Persist.init(collection.name, collection.Model);
         return collection;
@@ -71,30 +95,36 @@
       all: function() {
         return Persist.get(this.name);
       },
-      find: function(value, field) {
-        var model, res, _i, _len, _ref;
-        if (!((value != null) && (field != null))) {
+      find: function(query, field) {
+        var model, queryArray, res, _i, _len, _ref;
+        queryArray = argsToQueryArray(query, fields);
+        if (queryArray == null) {
           return [];
         }
         res = [];
         _ref = this.all();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           model = _ref[_i];
-          if (model[field] === value) {
+          if (queryArray.filter(param(function() {
+            return model[param.key] !== param.value;
+          })).length === 0) {
             res.push(model);
           }
         }
         return res;
       },
-      findOne: function(value, field) {
-        var model, _i, _len, _ref;
-        if (value == null) {
-          return null;
+      findOne: function(query, field) {
+        var model, queryArray, _i, _len, _ref;
+        queryArray = argsToQueryArray(query, fields);
+        if (queryArray == null) {
+          return [];
         }
         _ref = this.all();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           model = _ref[_i];
-          if (model[field] === value) {
+          if (queryArray.filter(param(function() {
+            return model[param.key] !== param.value;
+          })).length === 0) {
             return model;
           }
         }
@@ -182,35 +212,6 @@
 
   /**
     * @ngdoc service
-    * @name Config
-    * @requires
-    * @description
-    * Abstract service providing basic methods to manipulate collections
-    *
-    * @example
-  
-  ```js
-  	angular.module("syncCollections").factory "Stats", (BaseCollection) ->
-  		BaseCollection.extendAndPersist
-  			name: "stats"
-  ```
-   */
-  angular.module("syncCollections").factory("Config", function() {
-    return {
-      apiUrl: "",
-      retryCount: 3,
-      retryDelay: 500,
-      requestTimeout: 5000,
-      store: "PouchDBStorage"
-    };
-  });
-
-}).call(this);
-;(function() {
-  "use strict";
-
-  /**
-    * @ngdoc service
     * @name Loader
     * @requires $q
     * @description
@@ -245,7 +246,7 @@
         return promises.push(promise);
       },
       isLoading: function() {
-        return (promises != null ? promises.length : void 0) > 1;
+        return (promises != null ? promises.length : void 0) > 0;
       },
       load: function() {
         if (!loadPromise) {
@@ -268,11 +269,11 @@
     * Data store using the localStorage object.
     * The limit of Storage being 5MB, this is kind of a naive implementation for now.
    */
-  angular.module("syncCollections").factory("LocalStorage", ["$window", "$q", function($window, $q) {
+  angular.module("syncCollections").factory("LocalStorage", ["$window", "$q", "SyncCollectionsConfig", function($window, $q, SyncCollectionsConfig) {
     var _storage;
     _storage = $window.localStorage;
     return {
-      _prefix: "lovelooks",
+      _prefix: SyncCollectionsConfig.name,
       reset: function() {
         var key;
         for (key in _storage) {
@@ -324,7 +325,7 @@
   /**
     * @ngdoc service
     * @name Persist
-    * @requires $q, $http, Config, Loader, Storage
+    * @requires $q, $http, SyncCollectionsConfig, Loader, Storage
     * @description
     * Service used to retrieve collections from the database
     * This service used to retrieve and persist objects from the Storage.
@@ -345,10 +346,11 @@
   Persist.reset()
   ```
    */
-  angular.module("syncCollections").factory("Persist", ["$q", "$http", "$timeout", "$injector", "Config", "Loader", function($q, $http, $timeout, $injector, Config, Loader) {
-    var Storage, getCounter, persistable;
-    Storage = $injector.get(Config.store);
+  angular.module("syncCollections").factory("Persist", ["$q", "$http", "$timeout", "$injector", "SyncCollectionsConfig", "Loader", function($q, $http, $timeout, $injector, SyncCollectionsConfig, Loader) {
+    var Storage, getCounter, persistable, resyncPromise;
+    Storage = $injector.get(SyncCollectionsConfig.store);
     persistable = {};
+    resyncPromise = null;
     getCounter = function(name) {
       var deferred;
       deferred = $q.defer();
@@ -369,8 +371,11 @@
         persistable = {};
         return Storage.reset();
       },
-      reload: function() {
+      resync: function() {
         var deferred, k, p, promises;
+        if (resyncPromise) {
+          return resyncPromise;
+        }
         promises = [];
         for (k in persistable) {
           p = persistable[k];
@@ -378,7 +383,28 @@
           this._checkCounterAndLoad(deferred, p.name, p.modelClass);
           promises.push(deferred.promise);
         }
-        return $q.all(promises);
+        resyncPromise = $q.all(promises);
+        resyncPromise.then(function() {
+          return resyncPromise = null;
+        });
+        return resyncPromise;
+      },
+      load: function(resync) {
+        if (resync == null) {
+          resync = true;
+        }
+        if (Loader.isLoading()) {
+          return Loader.load();
+        } else if (resync) {
+          return this.resync();
+        } else {
+          return $q(function(resolve) {
+            return resolve();
+          });
+        }
+      },
+      isLoading: function() {
+        return Loader.isLoading();
       },
       checkCounters: function() {
         var deferred, k, p, promises;
@@ -394,7 +420,6 @@
       init: function(collectionName, Model) {
         var deferred;
         deferred = $q.defer();
-        console.log(collectionName, Model);
         this._checkCounterAndLoad(deferred, collectionName, Model);
         Loader.addPromise(deferred.promise);
         return deferred.promise;
@@ -408,9 +433,9 @@
       _checkCounter: function(deferred, collectionName, Model) {
         return getCounter(collectionName).then((function(_this) {
           return function(counter) {
-            return $http.get("" + Config.apiUrl + "/counter/" + collectionName, {
-              withCredentials: true,
-              timeout: Config.requestTimeout
+            return $http.get("" + SyncCollectionsConfig.apiUrl + "/counter/" + collectionName, {
+              withCredentials: SyncCollectionsConfig.withCredentials,
+              timeout: SyncCollectionsConfig.requestTimeout
             }).success(function(remoteCounter) {
               return deferred.resolve(counter === remoteCounter.counter);
             }).error(function() {
@@ -434,9 +459,9 @@
         if (window.cordova && ((_ref = navigator.connection) != null ? _ref.type : void 0) === Connection.NONE) {
           return this._getLocalCollection(deferred, collectionName, Model);
         } else {
-          return $http.get("" + Config.apiUrl + "/counter/" + collectionName, {
-            withCredentials: true,
-            timeout: 2 * Config.requestTimeout
+          return $http.get("" + SyncCollectionsConfig.apiUrl + "/counter/" + collectionName, {
+            withCredentials: SyncCollectionsConfig.withCredentials,
+            timeout: 2 * SyncCollectionsConfig.requestTimeout
           }).success((function(_this) {
             return function(remoteCounter) {
               if (counter === remoteCounter.counter) {
@@ -447,11 +472,11 @@
             };
           })(this)).error((function(_this) {
             return function() {
-              if (retry++ < Config.retryCount) {
-                console.error("Could not get the counter for " + collectionName + ", retry in 500ms (" + retry + "/" + Config.retryCount + ")");
+              if (retry++ < SyncCollectionsConfig.retryCount) {
+                console.error("Could not get the counter for " + collectionName + ", retry in 500ms (" + retry + "/" + SyncCollectionsConfig.retryCount + ")");
                 return $timeout(function() {
                   return _this._updateCollection(deferred, collectionName, Model, counter, retry);
-                }, Config.retryDelay);
+                }, SyncCollectionsConfig.retryDelay);
               } else {
                 console.error("Could not get the counter for " + collectionName + ", you may be offline? Getting local collection");
                 return _this._getLocalCollection(deferred, collectionName, Model);
@@ -461,9 +486,9 @@
         }
       },
       _fetchCollection: function(deferred, collectionName, Model, counter) {
-        return $http.get("" + Config.apiUrl + "/" + collectionName, {
-          withCredentials: true,
-          timeout: 5 * Config.requestTimeout
+        return $http.get("" + SyncCollectionsConfig.apiUrl + "/" + collectionName, {
+          withCredentials: SyncCollectionsConfig.withCredentials,
+          timeout: 5 * SyncCollectionsConfig.requestTimeout
         }).success((function(_this) {
           return function(collection) {
             return Storage.set(collectionName, collection, counter).then(function() {
@@ -516,18 +541,18 @@
     * @description
     * Data store using PouchDB
    */
-  angular.module("syncCollections").factory("PouchDBStorage", ["$q", "$rootScope", function($q, $rootScope) {
+  angular.module("syncCollections").factory("PouchDBStorage", ["$q", "$rootScope", "SyncCollectionsConfig", function($q, $rootScope, SyncCollectionsConfig) {
     var db;
-    db = new PouchDB("lovelooks");
+    db = new PouchDB(SyncCollectionsConfig.name);
     return {
       reset: function() {
         return $q(function(resolve, reject) {
           return db.destroy(function(err, info) {
             return $rootScope.$apply(function() {
               if (err) {
-                return reject("Could not delete the lovelooks db");
+                return reject("Could not delete the db: " + SyncCollectionsConfig.name);
               }
-              db = new PouchDB("lovelooks");
+              db = new PouchDB(SyncCollectionsConfig.name);
               return resolve();
             });
           });
@@ -582,6 +607,37 @@
   }]);
 
 }).call(this);
+;(function() {
+  "use strict";
+
+  /**
+    * @ngdoc service
+    * @name SyncCollectionsConfig
+    * @requires
+    * @description
+    * Abstract service providing basic methods to manipulate collections
+    *
+    * @example
+  
+  ```js
+  	angular.module("syncCollections").factory "Stats", (BaseCollection) ->
+  		BaseCollection.extendAndPersist
+  			name: "stats"
+  ```
+   */
+  angular.module("syncCollections").factory("SyncCollectionsConfig", function() {
+    return {
+      apiUrl: "",
+      retryCount: 3,
+      retryDelay: 500,
+      requestTimeout: 5000,
+      store: "PouchDBStorage",
+      withCredentials: false,
+      name: "syncCollections-" + parseInt(Math.random() * 10000000, 10)
+    };
+  });
+
+}).call(this);
 
 (function() {
   "use strict";
@@ -598,9 +654,8 @@
 
 (function() {
   "use strict";
-  angular.module("syncCollectionsDemo").controller("MainCtrl", function($scope, $timeout, $sce, UserCollection, Loader) {
-    console.log('ctrl');
-    return Loader.load().then(function() {
+  angular.module("syncCollectionsDemo").controller("MainCtrl", function($scope, $timeout, $sce, UserCollection, Persist) {
+    return Persist.load().then(function() {
       return $scope.users = UserCollection.all();
     });
   });
@@ -610,7 +665,6 @@
 (function() {
   "use strict";
   angular.module("syncCollectionsDemo").factory("UserCollection", function(BaseCollection) {
-    console.log('BaseCollection.extendAndPersist');
     return BaseCollection.extendAndPersist({
       name: "users"
     });

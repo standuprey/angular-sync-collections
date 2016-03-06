@@ -31,7 +31,32 @@
   ```
    */
   angular.module("syncCollections").factory("BaseCollection", ["Persist", function(Persist) {
-    var BaseModel;
+    var BaseModel, argsToQueryArray;
+    argsToQueryArray = function(query, field) {
+      var k, queryArray, v;
+      if (angular.isObject(query)) {
+        queryArray = [];
+        for (k in query) {
+          v = query[k];
+          queryArray.push({
+            key: k,
+            value: v
+          });
+        }
+        return queryArray;
+      } else {
+        if (field) {
+          return [
+            {
+              key: field,
+              value: query
+            }
+          ];
+        } else {
+
+        }
+      }
+    };
     BaseModel = (function() {
       function BaseModel(literal) {
         angular.extend(this, literal);
@@ -70,30 +95,36 @@
       all: function() {
         return Persist.get(this.name);
       },
-      find: function(value, field) {
-        var model, res, _i, _len, _ref;
-        if (!((value != null) && (field != null))) {
+      find: function(query, field) {
+        var model, queryArray, res, _i, _len, _ref;
+        queryArray = argsToQueryArray(query, fields);
+        if (queryArray == null) {
           return [];
         }
         res = [];
         _ref = this.all();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           model = _ref[_i];
-          if (model[field] === value) {
+          if (queryArray.filter(param(function() {
+            return model[param.key] !== param.value;
+          })).length === 0) {
             res.push(model);
           }
         }
         return res;
       },
-      findOne: function(value, field) {
-        var model, _i, _len, _ref;
-        if (value == null) {
-          return null;
+      findOne: function(query, field) {
+        var model, queryArray, _i, _len, _ref;
+        queryArray = argsToQueryArray(query, fields);
+        if (queryArray == null) {
+          return [];
         }
         _ref = this.all();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           model = _ref[_i];
-          if (model[field] === value) {
+          if (queryArray.filter(param(function() {
+            return model[param.key] !== param.value;
+          })).length === 0) {
             return model;
           }
         }
