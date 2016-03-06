@@ -51,13 +51,13 @@ angular.module("syncCollections").factory "BaseCollection", (Persist) ->
 		return [] unless queryArray?
 		res = []
 		for model in @all()
-			if queryArray.filter(param -> model[param.key] isnt param.value).length is 0
+			if queryArray.filter((param) -> model[param.key] isnt param.value).length is 0
 				res.push model
 		res
 	findOne: (query, field) ->
 		queryArray = argsToQueryArray(query, field)
 		return [] unless queryArray?
 		for model in @all()
-			if queryArray.filter(param -> model[param.key] isnt param.value).length is 0
+			if queryArray.filter((param) -> model[param.key] isnt param.value).length is 0
 				return model
 		null

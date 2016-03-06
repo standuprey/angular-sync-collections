@@ -105,9 +105,9 @@
         _ref = this.all();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           model = _ref[_i];
-          if (queryArray.filter(param(function() {
+          if (queryArray.filter(function(param) {
             return model[param.key] !== param.value;
-          })).length === 0) {
+          }).length === 0) {
             res.push(model);
           }
         }
@@ -122,9 +122,9 @@
         _ref = this.all();
         for (_i = 0, _len = _ref.length; _i < _len; _i++) {
           model = _ref[_i];
-          if (queryArray.filter(param(function() {
+          if (queryArray.filter(function(param) {
             return model[param.key] !== param.value;
-          })).length === 0) {
+          }).length === 0) {
             return model;
           }
         }
