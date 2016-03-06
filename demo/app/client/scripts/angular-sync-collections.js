@@ -97,7 +97,7 @@
       },
       find: function(query, field) {
         var model, queryArray, res, _i, _len, _ref;
-        queryArray = argsToQueryArray(query, fields);
+        queryArray = argsToQueryArray(query, field);
         if (queryArray == null) {
           return [];
         }
@@ -115,7 +115,7 @@
       },
       findOne: function(query, field) {
         var model, queryArray, _i, _len, _ref;
-        queryArray = argsToQueryArray(query, fields);
+        queryArray = argsToQueryArray(query, field);
         if (queryArray == null) {
           return [];
         }
